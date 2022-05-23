@@ -4,6 +4,7 @@ from datetime import datetime
 
 APP_ID = os.environ.get("NUTR_ID")
 APP_KEY = os.environ.get("NUTR_API_KEY")
+AUTH_TOKEN = os.environ.get("AUTH_TOKEN")
 
 exercise_query = input("What exercise(s) did you do? ")
 
@@ -11,6 +12,10 @@ headers = {
     "x-app-id": APP_ID,
     "x-app-key": APP_KEY,
     "x-remote-user-id": "0"
+}
+
+auth_headers = {
+    "Authorization": AUTH_TOKEN
 }
 
 exercise_parameters = {
@@ -22,7 +27,7 @@ exercise_parameters = {
 }
 
 exercise_endpoint = "https://trackapi.nutritionix.com/v2/natural/exercise"
-sheety_endpoint = "https://api.sheety.co/8b4b6d38f07f44ff2c34f43d12529f0d/workoutTracking/workouts"
+sheety_endpoint = os.environ.get("SHEET_ENDPOINT")
 
 post_exercise = requests.post(exercise_endpoint, json=exercise_parameters,  headers=headers)
 results = post_exercise.json()
@@ -44,5 +49,9 @@ for exercise in results["exercises"]:
         }
     }
 
-    sheet_output = requests.post(sheety_endpoint, json=record_inputs)
+    sheet_output = requests.post(
+        sheety_endpoint,
+        json=record_inputs,
+        headers=auth_headers
+    )
     print(sheet_output.text)
